@@ -7,27 +7,42 @@ import (
 	"strconv"
 )
 
-// EncodePacket encodes packet into a string. Error is nil if encoding succeeds
-func EncodePacket(pk packet, binarySupported bool) (string, error) {
-	var pkStr string
+func setPacketType(pk packet) (string, error) {
 	// Set packet type
 	switch pk.typ {
 	case "open":
-		pkStr = strconv.Itoa(OPEN)
+		return strconv.Itoa(OPEN), nil
 	case "close":
-		pkStr = strconv.Itoa(CLOSE)
+		return strconv.Itoa(CLOSE), nil
 	case "ping":
-		pkStr = strconv.Itoa(PING)
+		return strconv.Itoa(PING), nil
 	case "pong":
-		pkStr = strconv.Itoa(PONG)
+		return strconv.Itoa(PONG), nil
 	case "message":
-		pkStr = strconv.Itoa(MESSAGE)
+		return strconv.Itoa(MESSAGE), nil
 	case "upgrade":
-		pkStr = strconv.Itoa(UPGRADE)
+		return strconv.Itoa(UPGRADE), nil
 	case "noop":
-		pkStr = strconv.Itoa(NOOP)
+		return strconv.Itoa(NOOP), nil
 	default:
 		return "", errors.New("invalid packet type")
+	}
+}
+
+func encodeBuffer(data []byte, packetString string, binarySupported bool) string {
+	if binarySupported {
+		return string(data)
+	}
+	dst := make([]byte, base64.StdEncoding.EncodedLen(len(data)))
+	base64.StdEncoding.Encode(dst, data)
+	return "b" + packetString + string(dst)
+}
+
+// EncodePacket encodes packet into a string. Error is nil if encoding succeeds
+func EncodePacket(pk packet, binarySupported bool) (string, error) {
+	pkStr, err := setPacketType(pk)
+	if err != nil {
+		return "", err
 	}
 
 	// Encode packet data
@@ -36,15 +51,7 @@ func EncodePacket(pk packet, binarySupported bool) (string, error) {
 		case string:
 			pkStr += pk.data.(string)
 		case []byte:
-			if binarySupported {
-				for _, ch := range pk.data.([]byte) {
-					pkStr += strconv.Itoa(int(ch))
-				}
-				break
-			}
-			dst := make([]byte, base64.StdEncoding.EncodedLen(len(pk.data.([]byte))))
-			base64.StdEncoding.Encode(dst, pk.data.([]byte))
-			pkStr = "b" + pkStr + string(dst)
+			pkStr = encodeBuffer(pk.data.([]byte), pkStr, binarySupported)
 		case map[string]interface{}:
 			j, err := json.Marshal(pk.data.(map[string]interface{}))
 			if err != nil {
