@@ -1,43 +1,47 @@
 package parser
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/yaw-sid/engineio"
+)
 
 var decPacketTestCases = []struct {
 	encString       interface{}
 	binarySupported bool
-	resp            packet
+	resp            engineio.Packet
 }{
 	{
 		encString:       "2probe",
 		binarySupported: false,
-		resp:            packet{typ: "ping", data: "probe"},
+		resp:            engineio.Packet{Type: "ping", Data: "probe"},
 	},
 	{
 		encString:       "b4AQIDBA==",
 		binarySupported: false,
-		resp:            packet{typ: "message", data: []byte{01, 02, 03, 04}},
+		resp:            engineio.Packet{Type: "message", Data: []byte{01, 02, 03, 04}},
 	},
 }
 
 var decPayloadTestCases = []struct {
 	pl              string
 	binarySupported bool
-	resp            payload
+	resp            engineio.Payload
 }{
 	{
 		pl:              "6:4hello2:4$",
 		binarySupported: false,
-		resp: payload{
-			{typ: "message", data: "hello"},
-			{typ: "message", data: "$"},
+		resp: engineio.Payload{
+			{Type: "message", Data: "hello"},
+			{Type: "message", Data: "$"},
 		},
 	},
 	{
 		pl:              "2:4$10:b4AQIDBA==",
 		binarySupported: false,
-		resp: payload{
-			{typ: "message", data: "$"},
-			{typ: "message", data: []byte{01, 02, 03, 04}},
+		resp: engineio.Payload{
+			{Type: "message", Data: "$"},
+			{Type: "message", Data: []byte{01, 02, 03, 04}},
 		},
 	},
 }
@@ -48,17 +52,17 @@ func TestDecodePacket(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to decode packet: %s", err.Error())
 		}
-		if pk.typ != tc.resp.typ {
-			t.Fatalf("Type inconsistency: %s - %s", pk.typ, tc.resp.typ)
+		if pk.Type != tc.resp.Type {
+			t.Fatalf("Type inconsistency: %s - %s", pk.Type, tc.resp.Type)
 		}
-		switch tc.resp.data.(type) {
+		switch tc.resp.Data.(type) {
 		case string:
-			if pk.data != tc.resp.data {
-				t.Fatalf("Data inconsistency: %s - %s", pk.data, tc.resp.data)
+			if pk.Data != tc.resp.Data {
+				t.Fatalf("Data inconsistency: %s - %s", pk.Data, tc.resp.Data)
 			}
 		case []byte:
-			if len(pk.data.([]byte)) != len(tc.resp.data.([]byte)) {
-				t.Fatalf("Data inconsistency: %d - %d", pk.data, tc.resp.data)
+			if len(pk.Data.([]byte)) != len(tc.resp.Data.([]byte)) {
+				t.Fatalf("Data inconsistency: %d - %d", pk.Data, tc.resp.Data)
 			}
 		}
 		t.Logf("Decoded packet: %v", *pk)
@@ -75,17 +79,17 @@ func TestDecodePayload(t *testing.T) {
 			t.Fatalf("Payload inconsistency: %d - %d", len(pl), len(tc.resp))
 		}
 		for i, pk := range pl {
-			if pk.typ != tc.resp[i].typ {
-				t.Fatalf("Type inconsistency: %s - %s", pk.typ, tc.resp[i].typ)
+			if pk.Type != tc.resp[i].Type {
+				t.Fatalf("Type inconsistency: %s - %s", pk.Type, tc.resp[i].Type)
 			}
-			switch tc.resp[i].data.(type) {
+			switch tc.resp[i].Data.(type) {
 			case string:
-				if pk.data != tc.resp[i].data {
-					t.Fatalf("Data inconsistency: %s - %s", pk.data, tc.resp[i].data)
+				if pk.Data != tc.resp[i].Data {
+					t.Fatalf("Data inconsistency: %s - %s", pk.Data, tc.resp[i].Data)
 				}
 			case []byte:
-				if len(pk.data.([]byte)) != len(tc.resp[i].data.([]byte)) {
-					t.Fatalf("Data inconsistency: %d - %d", pk.data, tc.resp[i].data)
+				if len(pk.Data.([]byte)) != len(tc.resp[i].Data.([]byte)) {
+					t.Fatalf("Data inconsistency: %d - %d", pk.Data, tc.resp[i].Data)
 				}
 			}
 		}

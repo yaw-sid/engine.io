@@ -1,4 +1,4 @@
-package parser
+package engineio
 
 const (
 	// OPEN is sent from the server when a new transport is opened(recheck).
@@ -23,7 +23,7 @@ const (
 	NOOP
 )
 
-type packet struct {
-	typ  string
-	data interface{}
+type Packet struct {
+	Type string
+	Data interface{}
 }

@@ -5,25 +5,27 @@ import (
 	"encoding/json"
 	"errors"
 	"strconv"
+
+	"github.com/yaw-sid/engineio"
 )
 
-func setPacketType(pk packet) (string, error) {
+func setPacketType(pk engineio.Packet) (string, error) {
 	// Set packet type
-	switch pk.typ {
+	switch pk.Type {
 	case "open":
-		return strconv.Itoa(OPEN), nil
+		return strconv.Itoa(engineio.OPEN), nil
 	case "close":
-		return strconv.Itoa(CLOSE), nil
+		return strconv.Itoa(engineio.CLOSE), nil
 	case "ping":
-		return strconv.Itoa(PING), nil
+		return strconv.Itoa(engineio.PING), nil
 	case "pong":
-		return strconv.Itoa(PONG), nil
+		return strconv.Itoa(engineio.PONG), nil
 	case "message":
-		return strconv.Itoa(MESSAGE), nil
+		return strconv.Itoa(engineio.MESSAGE), nil
 	case "upgrade":
-		return strconv.Itoa(UPGRADE), nil
+		return strconv.Itoa(engineio.UPGRADE), nil
 	case "noop":
-		return strconv.Itoa(NOOP), nil
+		return strconv.Itoa(engineio.NOOP), nil
 	default:
 		return "", errors.New("invalid packet type")
 	}
@@ -39,21 +41,21 @@ func encodeBuffer(data []byte, packetString string, binarySupported bool) string
 }
 
 // EncodePacket encodes packet into a string. Error is nil if encoding succeeds
-func EncodePacket(pk packet, binarySupported bool) (string, error) {
+func EncodePacket(pk engineio.Packet, binarySupported bool) (string, error) {
 	pkStr, err := setPacketType(pk)
 	if err != nil {
 		return "", err
 	}
 
 	// Encode packet data
-	if pk.data != nil {
-		switch pk.data.(type) {
+	if pk.Data != nil {
+		switch pk.Data.(type) {
 		case string:
-			pkStr += pk.data.(string)
+			pkStr += pk.Data.(string)
 		case []byte:
-			pkStr = encodeBuffer(pk.data.([]byte), pkStr, binarySupported)
+			pkStr = encodeBuffer(pk.Data.([]byte), pkStr, binarySupported)
 		case map[string]interface{}:
-			j, err := json.Marshal(pk.data.(map[string]interface{}))
+			j, err := json.Marshal(pk.Data.(map[string]interface{}))
 			if err != nil {
 				return "", err
 			}
@@ -65,7 +67,7 @@ func EncodePacket(pk packet, binarySupported bool) (string, error) {
 }
 
 // EncodePayload encodes payload into a string. Error is nil if encoding succeeds
-func EncodePayload(p payload, binarySupported bool) (string, error) {
+func EncodePayload(p engineio.Payload, binarySupported bool) (string, error) {
 	var payloadStr string
 	// Encode each packet in the payload
 	for _, pk := range p {

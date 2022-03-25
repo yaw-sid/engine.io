@@ -6,49 +6,51 @@ package parser
 
 import (
 	"testing"
+
+	"github.com/yaw-sid/engineio"
 )
 
 var packetTestCases = []struct {
-	pk              packet
+	pk              engineio.Packet
 	binarySupported bool
 	response        string
 }{
 	{
-		packet{typ: "ping", data: "probe"},
+		engineio.Packet{Type: "ping", Data: "probe"},
 		false,
 		"2probe",
 	},
 	{
-		packet{typ: "message", data: "$"},
+		engineio.Packet{Type: "message", Data: "$"},
 		false,
 		"4$",
 	},
 }
 
 var payloadTestCases = []struct {
-	plyd            payload
+	plyd            engineio.Payload
 	binarySupported bool
 	response        string
 }{
 	{
-		payload{
-			{typ: "message", data: "hello"},
-			{typ: "message", data: "$"},
+		engineio.Payload{
+			{Type: "message", Data: "hello"},
+			{Type: "message", Data: "$"},
 		},
 		false,
 		"6:4hello2:4$",
 	},
 	{
-		payload{
-			{typ: "message", data: "$"},
-			{typ: "message", data: []byte{01, 02, 03, 04}},
+		engineio.Payload{
+			{Type: "message", Data: "$"},
+			{Type: "message", Data: []byte{01, 02, 03, 04}},
 		},
 		false,
 		"2:4$10:b4AQIDBA==",
 	},
 	{
-		payload{
-			{typ: "open", data: map[string]interface{}{
+		engineio.Payload{
+			{Type: "open", Data: map[string]interface{}{
 				"sid":          "lv_VI97HAXpY6yYWAAAC",
 				"upgrades":     []string{"websocket"},
 				"pingInterval": 25000,

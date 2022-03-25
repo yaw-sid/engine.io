@@ -4,6 +4,8 @@ import (
 	"encoding/base64"
 	"errors"
 	"strconv"
+
+	"github.com/yaw-sid/engineio"
 )
 
 func decodeBase64String(str string) ([]byte, error) {
@@ -16,38 +18,38 @@ func decodeBase64String(str string) ([]byte, error) {
 }
 
 // DecodePacket decodes a string into a packet. Error is nil if decoding succeeds
-func DecodePacket(encPk interface{}, binarySupported bool) (*packet, error) {
+func DecodePacket(encPk interface{}, binarySupported bool) (*engineio.Packet, error) {
 	switch encPk.(type) {
 	case []byte:
-		return &packet{typ: "message", data: encPk}, nil
+		return &engineio.Packet{Type: "message", Data: encPk}, nil
 	case string:
 		if encPk.(string)[0] == 'b' {
 			decodedBase64, err := decodeBase64String(encPk.(string)[2:])
 			if err != nil {
 				return nil, err
 			}
-			return &packet{typ: "message", data: decodedBase64}, nil
+			return &engineio.Packet{Type: "message", Data: decodedBase64}, nil
 		}
 		// Set packet type
-		var pk packet
+		var pk engineio.Packet
 		switch string(encPk.(string)[0]) {
-		case strconv.Itoa(OPEN):
-			pk.typ = "open"
-		case strconv.Itoa(CLOSE):
-			pk.typ = "close"
-		case strconv.Itoa(PING):
-			pk.typ = "ping"
-		case strconv.Itoa(PONG):
-			pk.typ = "pong"
-		case strconv.Itoa(MESSAGE):
-			pk.typ = "message"
-		case strconv.Itoa(UPGRADE):
-			pk.typ = "upgrade"
-		case strconv.Itoa(NOOP):
-			pk.typ = "noop"
+		case strconv.Itoa(engineio.OPEN):
+			pk.Type = "open"
+		case strconv.Itoa(engineio.CLOSE):
+			pk.Type = "close"
+		case strconv.Itoa(engineio.PING):
+			pk.Type = "ping"
+		case strconv.Itoa(engineio.PONG):
+			pk.Type = "pong"
+		case strconv.Itoa(engineio.MESSAGE):
+			pk.Type = "message"
+		case strconv.Itoa(engineio.UPGRADE):
+			pk.Type = "upgrade"
+		case strconv.Itoa(engineio.NOOP):
+			pk.Type = "noop"
 		}
 		if len(encPk.(string)) > 1 {
-			pk.data = encPk.(string)[1:]
+			pk.Data = encPk.(string)[1:]
 		}
 		return &pk, nil
 	}
@@ -86,13 +88,13 @@ func splitPayload(pl string) ([]string, error) {
 }
 
 // DecodePayload decodes a string into a payload. Error is nil if decoding succeeds
-func DecodePayload(encPayload string, binarySupported bool) (payload, error) {
+func DecodePayload(encPayload string, binarySupported bool) (engineio.Payload, error) {
 	encPackets, err := splitPayload(encPayload)
 	if err != nil {
 		return nil, err
 	}
 
-	var pyld payload
+	var pyld engineio.Payload
 
 	for _, encPk := range encPackets {
 		decPk, err := DecodePacket(encPk, binarySupported)
