@@ -1,37 +1,41 @@
+/*
+	Decoder tests
+*/
+
 package parser
 
 import (
 	"testing"
 
-	"github.com/yaw-sid/engineio"
+	"github.com/yaw-sid/engineio/frame"
 )
 
 var decPacketTestCases = []struct {
 	encString       interface{}
 	binarySupported bool
-	resp            engineio.Packet
+	resp            frame.Packet
 }{
 	{
 		encString:       "2probe",
 		binarySupported: false,
-		resp:            engineio.Packet{Type: "ping", Data: "probe"},
+		resp:            frame.Packet{Type: "ping", Data: "probe"},
 	},
 	{
 		encString:       "b4AQIDBA==",
 		binarySupported: false,
-		resp:            engineio.Packet{Type: "message", Data: []byte{01, 02, 03, 04}},
+		resp:            frame.Packet{Type: "message", Data: []byte{01, 02, 03, 04}},
 	},
 }
 
 var decPayloadTestCases = []struct {
 	pl              string
 	binarySupported bool
-	resp            engineio.Payload
+	resp            frame.Payload
 }{
 	{
 		pl:              "6:4hello2:4$",
 		binarySupported: false,
-		resp: engineio.Payload{
+		resp: frame.Payload{
 			{Type: "message", Data: "hello"},
 			{Type: "message", Data: "$"},
 		},
@@ -39,7 +43,7 @@ var decPayloadTestCases = []struct {
 	{
 		pl:              "2:4$10:b4AQIDBA==",
 		binarySupported: false,
-		resp: engineio.Payload{
+		resp: frame.Payload{
 			{Type: "message", Data: "$"},
 			{Type: "message", Data: []byte{01, 02, 03, 04}},
 		},

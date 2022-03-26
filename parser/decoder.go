@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/yaw-sid/engineio"
+	"github.com/yaw-sid/engineio/frame"
 )
 
 func decodeBase64String(str string) ([]byte, error) {
@@ -18,34 +18,34 @@ func decodeBase64String(str string) ([]byte, error) {
 }
 
 // DecodePacket decodes a string into a packet. Error is nil if decoding succeeds
-func DecodePacket(encPk interface{}, binarySupported bool) (*engineio.Packet, error) {
+func DecodePacket(encPk interface{}, binarySupported bool) (*frame.Packet, error) {
 	switch encPk.(type) {
 	case []byte:
-		return &engineio.Packet{Type: "message", Data: encPk}, nil
+		return &frame.Packet{Type: "message", Data: encPk}, nil
 	case string:
 		if encPk.(string)[0] == 'b' {
 			decodedBase64, err := decodeBase64String(encPk.(string)[2:])
 			if err != nil {
 				return nil, err
 			}
-			return &engineio.Packet{Type: "message", Data: decodedBase64}, nil
+			return &frame.Packet{Type: "message", Data: decodedBase64}, nil
 		}
 		// Set packet type
-		var pk engineio.Packet
+		var pk frame.Packet
 		switch string(encPk.(string)[0]) {
-		case strconv.Itoa(engineio.OPEN):
+		case strconv.Itoa(frame.OPEN):
 			pk.Type = "open"
-		case strconv.Itoa(engineio.CLOSE):
+		case strconv.Itoa(frame.CLOSE):
 			pk.Type = "close"
-		case strconv.Itoa(engineio.PING):
+		case strconv.Itoa(frame.PING):
 			pk.Type = "ping"
-		case strconv.Itoa(engineio.PONG):
+		case strconv.Itoa(frame.PONG):
 			pk.Type = "pong"
-		case strconv.Itoa(engineio.MESSAGE):
+		case strconv.Itoa(frame.MESSAGE):
 			pk.Type = "message"
-		case strconv.Itoa(engineio.UPGRADE):
+		case strconv.Itoa(frame.UPGRADE):
 			pk.Type = "upgrade"
-		case strconv.Itoa(engineio.NOOP):
+		case strconv.Itoa(frame.NOOP):
 			pk.Type = "noop"
 		}
 		if len(encPk.(string)) > 1 {
@@ -88,13 +88,13 @@ func splitPayload(pl string) ([]string, error) {
 }
 
 // DecodePayload decodes a string into a payload. Error is nil if decoding succeeds
-func DecodePayload(encPayload string, binarySupported bool) (engineio.Payload, error) {
+func DecodePayload(encPayload string, binarySupported bool) (frame.Payload, error) {
 	encPackets, err := splitPayload(encPayload)
 	if err != nil {
 		return nil, err
 	}
 
-	var pyld engineio.Payload
+	var pyld frame.Payload
 
 	for _, encPk := range encPackets {
 		decPk, err := DecodePacket(encPk, binarySupported)

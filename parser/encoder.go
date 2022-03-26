@@ -6,26 +6,26 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/yaw-sid/engineio"
+	"github.com/yaw-sid/engineio/frame"
 )
 
-func setPacketType(pk engineio.Packet) (string, error) {
+func setPacketType(pk frame.Packet) (string, error) {
 	// Set packet type
 	switch pk.Type {
 	case "open":
-		return strconv.Itoa(engineio.OPEN), nil
+		return strconv.Itoa(frame.OPEN), nil
 	case "close":
-		return strconv.Itoa(engineio.CLOSE), nil
+		return strconv.Itoa(frame.CLOSE), nil
 	case "ping":
-		return strconv.Itoa(engineio.PING), nil
+		return strconv.Itoa(frame.PING), nil
 	case "pong":
-		return strconv.Itoa(engineio.PONG), nil
+		return strconv.Itoa(frame.PONG), nil
 	case "message":
-		return strconv.Itoa(engineio.MESSAGE), nil
+		return strconv.Itoa(frame.MESSAGE), nil
 	case "upgrade":
-		return strconv.Itoa(engineio.UPGRADE), nil
+		return strconv.Itoa(frame.UPGRADE), nil
 	case "noop":
-		return strconv.Itoa(engineio.NOOP), nil
+		return strconv.Itoa(frame.NOOP), nil
 	default:
 		return "", errors.New("invalid packet type")
 	}
@@ -41,7 +41,7 @@ func encodeBuffer(data []byte, packetString string, binarySupported bool) string
 }
 
 // EncodePacket encodes packet into a string. Error is nil if encoding succeeds
-func EncodePacket(pk engineio.Packet, binarySupported bool) (string, error) {
+func EncodePacket(pk frame.Packet, binarySupported bool) (string, error) {
 	pkStr, err := setPacketType(pk)
 	if err != nil {
 		return "", err
@@ -67,7 +67,7 @@ func EncodePacket(pk engineio.Packet, binarySupported bool) (string, error) {
 }
 
 // EncodePayload encodes payload into a string. Error is nil if encoding succeeds
-func EncodePayload(p engineio.Payload, binarySupported bool) (string, error) {
+func EncodePayload(p frame.Payload, binarySupported bool) (string, error) {
 	var payloadStr string
 	// Encode each packet in the payload
 	for _, pk := range p {

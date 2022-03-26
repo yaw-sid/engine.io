@@ -7,33 +7,33 @@ package parser
 import (
 	"testing"
 
-	"github.com/yaw-sid/engineio"
+	"github.com/yaw-sid/engineio/frame"
 )
 
 var packetTestCases = []struct {
-	pk              engineio.Packet
+	pk              frame.Packet
 	binarySupported bool
 	response        string
 }{
 	{
-		engineio.Packet{Type: "ping", Data: "probe"},
+		frame.Packet{Type: "ping", Data: "probe"},
 		false,
 		"2probe",
 	},
 	{
-		engineio.Packet{Type: "message", Data: "$"},
+		frame.Packet{Type: "message", Data: "$"},
 		false,
 		"4$",
 	},
 }
 
 var payloadTestCases = []struct {
-	plyd            engineio.Payload
+	plyd            frame.Payload
 	binarySupported bool
 	response        string
 }{
 	{
-		engineio.Payload{
+		frame.Payload{
 			{Type: "message", Data: "hello"},
 			{Type: "message", Data: "$"},
 		},
@@ -41,7 +41,7 @@ var payloadTestCases = []struct {
 		"6:4hello2:4$",
 	},
 	{
-		engineio.Payload{
+		frame.Payload{
 			{Type: "message", Data: "$"},
 			{Type: "message", Data: []byte{01, 02, 03, 04}},
 		},
@@ -49,7 +49,7 @@ var payloadTestCases = []struct {
 		"2:4$10:b4AQIDBA==",
 	},
 	{
-		engineio.Payload{
+		frame.Payload{
 			{Type: "open", Data: map[string]interface{}{
 				"sid":          "lv_VI97HAXpY6yYWAAAC",
 				"upgrades":     []string{"websocket"},

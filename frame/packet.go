@@ -1,4 +1,4 @@
-package engineio
+package frame
 
 const (
 	// OPEN is sent from the server when a new transport is opened(recheck).
